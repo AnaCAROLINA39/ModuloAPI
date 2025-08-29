@@ -52,8 +52,28 @@ app.MapPost("administradores/login", ([FromBody] LoginDTO loginDTO, iAdministrad
 // Listar todos (com paginação opcional)
 app.MapGet("administradores", ([FromQuery] int? pagina, iAdministradorServico administradorServico) =>
 {
-    return Results.Ok(administradorServico.Todos(pagina));
+    var adms = new List<AdministradorModelView>();
+    var administradores = administradorServico.Todos(pagina);
+    foreach (var Adm in administradores)
+    {
+        adms.Add(new AdministradorModelView
+        {
+            Id = Adm.Id,
+            Email = Adm.Email,
+           //  Perfil = Enum.Parse<Perfil>(Adm.Perfil, ignoreCase: true), 
+           Perfil = Adm.Perfil
+        });
+        Console.WriteLine(Adm.Perfil);
+    }
+
+    return Results.Ok(adms); // 👈 retorno para o Swagger
 }).WithTags("Administradores");
+
+
+// app.MapGet("administradores", ([FromQuery] int? pagina, iAdministradorServico administradorServico) =>
+// {
+//     return Results.Ok(administradorServico.Todos(pagina));
+// }).WithTags("Administradores");
 
 // Buscar por ID
 app.MapGet("administradores/{id}", ([FromRoute] int id, iAdministradorServico administradorServico) =>
@@ -61,7 +81,13 @@ app.MapGet("administradores/{id}", ([FromRoute] int id, iAdministradorServico ad
     var administrador = administradorServico.BuscaPorId(id);
     if (administrador == null)
         return Results.NotFound();
-    return Results.Ok(administrador);
+    return Results.Ok((new AdministradorModelView
+        {
+            Id = administrador.Id,
+            Email = administrador.Email,
+           //  Perfil = Enum.Parse<Perfil>(Adm.Perfil, ignoreCase: true), 
+           Perfil = administrador.Perfil
+        }));
 }).WithTags("Administradores");
 
 // Criar novo administrador
@@ -85,13 +111,34 @@ app.MapPost("administradores", ([FromBody] AdiministradorDTO administradorDTO, i
     {
         Email = administradorDTO.Email,
         Senha = administradorDTO.Senha,
-        Perfil = administradorDTO.Perfil.ToString()  ?? Perfil.editor.ToString()
+        Perfil = administradorDTO.Perfil.ToString()  ?? Perfil.Editor.ToString()
     };
 
     administradorServico.Incluir(administrador);
 
-    return Results.Created($"/administradores/{administrador?.Id}", administrador);
+    if (administrador == null)
+        return Results.StatusCode(500); // Ou outro tratamento de erro apropriado
+
+    return Results.Created($"/administradores/{administrador.Id}", new AdministradorModelView
+    {
+        Id = administrador.Id,
+        Email = administrador.Email,
+        Perfil = administrador.Perfil
+    });
 }).WithTags("Administradores");
+
+
+app.MapDelete("Administradores/{id}", ([FromRoute] int id, iAdministradorServico administradorServico) =>
+{
+    var administradorExistente = administradorServico.BuscaPorId(id);
+    if (administradorExistente == null)
+        return Results.NotFound(new { mensagem = "Administrador não encontrado" });
+
+    administradorServico.Apagar(administradorExistente);
+
+    return Results.Ok(new { mensagem = "Excluído com sucesso" });
+})
+.WithTags("Administradores");
 
 #endregion
 

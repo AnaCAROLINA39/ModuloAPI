@@ -14,9 +14,9 @@ namespace ModuloAPI.Dominio.Interfaces
         Administrador Incluir(Administrador administrador);
 
         List<Administrador> Todos(int? pagina);
-        
-           Administrador? BuscaPorId(int id);
-       // Administrador ObterPorId(int id);
 
+        Administrador? BuscaPorId(int id);
+        // Administrador ObterPorId(int id);
+        void Apagar(Administrador administrador);
     }
 }

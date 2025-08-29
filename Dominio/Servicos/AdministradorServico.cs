@@ -17,6 +17,12 @@ namespace ModuloAPI.Dominio.Servicos
             _contexto = contexto;
         }
 
+        public void Apagar(Administrador administrador)
+        {
+                _contexto.Administradores.Remove(administrador);
+            _contexto.SaveChanges();
+        }
+
         public Administrador? BuscaPorId(int id)
         {
             return _contexto.Administradores.Where(v => v.Id == id).FirstOrDefault();
