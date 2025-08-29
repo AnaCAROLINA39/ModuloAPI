@@ -10,6 +10,13 @@ namespace ModuloAPI.Dominio.Interfaces
     public interface iAdministradorServico
     {
         Administrador Login(LoginDTO loginDTO);
-        
+
+        Administrador Incluir(Administrador administrador);
+
+        List<Administrador> Todos(int? pagina);
+
+        Administrador? BuscaPorId(int id);
+        // Administrador ObterPorId(int id);
+        void Apagar(Administrador administrador);
     }
 }
